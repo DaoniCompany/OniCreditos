@@ -269,7 +269,7 @@ async function initializeUsers() {
 }
 
 // Descomenta la siguiente línea solo la primera vez para crear usuarios
-// initializeUsers();
+initializeUsers();
 
 // Escuchar cambios de autenticación
 auth.onAuthStateChanged(user => {

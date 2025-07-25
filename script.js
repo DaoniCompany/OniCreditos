@@ -44,6 +44,7 @@ logoutBtn.addEventListener('click', handleLogout);
 addCreditsBtn.addEventListener('click', () => handleCreditChange('add'));
 removeCreditsBtn.addEventListener('click', () => handleCreditChange('remove'));
 addTransactionBtn.addEventListener('click', handleAddTransaction);
+transferCreditsBtn.addEventListener('click', handleTransfer);
 
 // Funciones
 function handleLogin(e) {

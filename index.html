@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billetera Digital</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-container" id="login-container">
+            <h1>Billetera Digital</h1>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit">Iniciar Sesión</button>
+            </form>
+        </div>
+
+        <div class="wallet-container" id="wallet-container" style="display: none;">
+            <header>
+                <h1>Billetera Digital</h1>
+                <button id="logout-btn">Cerrar Sesión</button>
+            </header>
+
+            <div class="balance-section">
+                <h2>Saldo Actual</h2>
+                <div class="balance-amount" id="balance-amount">0</div>
+                <span class="credits-label">créditos</span>
+            </div>
+
+            <div class="admin-section" id="admin-section" style="display: none;">
+                <h2>Administrar Créditos</h2>
+                <div class="admin-controls">
+                    <input type="number" id="credit-amount" placeholder="Cantidad">
+                    <button id="add-credits">Agregar</button>
+                    <button id="remove-credits">Quitar</button>
+                </div>
+                <div class="transaction-form">
+                    <input type="text" id="transaction-description" placeholder="Descripción de compra">
+                    <button id="add-transaction">Agregar Transacción</button>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <h2>Historial de Transacciones</h2>
+                <div class="history-list" id="history-list">
+                    <!-- Las transacciones se agregarán aquí dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

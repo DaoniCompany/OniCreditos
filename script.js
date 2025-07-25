@@ -72,6 +72,22 @@ function handleLogin(e) {
     }
 }
 
+function showMessage(message, isError = true) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `login-message ${isError ? 'error' : 'success'}`;
+    messageDiv.textContent = message;
+    
+    const oldMessage = document.querySelector('.login-message');
+    if (oldMessage) oldMessage.remove();
+    
+    loginForm.prepend(messageDiv);
+    
+    setTimeout(() => {
+        messageDiv.style.opacity = '0';
+        setTimeout(() => messageDiv.remove(), 500);
+    }, 3000);
+}
+
 function handleLogout() {
     currentUser = null;
     walletContainer.style.display = 'none';

@@ -178,3 +178,51 @@ function handleAddTransaction() {
     transactionDescription.value = '';
     updateUI();
 }
+
+function handleTransfer() {
+    const selectedUser = userSelect.value;
+    const amount = parseInt(transferAmount.value);
+    const today = new Date().toISOString().split('T')[0];
+
+    if (!selectedUser) {
+        showMessage('Por favor selecciona un usuario', true);
+        return;
+    }
+
+    if (isNaN(amount) {
+        showMessage('Por favor ingresa una cantidad válida', true);
+        return;
+    }
+
+    if (amount <= 0) {
+        showMessage('La cantidad debe ser mayor que cero', true);
+        return;
+    }
+
+    // Actualizar el balance del usuario seleccionado
+    users[selectedUser].balance += amount;
+    users[selectedUser].history.push({
+        date: today,
+        description: `Créditos añadidos por admin (${currentUser.username})`,
+        amount: amount
+    });
+
+    // Registrar la transacción en el admin también
+    currentUser.history.push({
+        date: today,
+        description: `Créditos transferidos a ${selectedUser}`,
+        amount: -amount
+    });
+
+    showMessage(`¡Se añadieron ${amount} créditos a ${selectedUser}!`, false);
+    
+    // Limpiar los campos
+    transferAmount.value = '';
+    userSelect.value = '';
+
+    // Si el usuario actual es el que recibió créditos, actualizar UI
+    if (currentUser.username === selectedUser) {
+        currentUser.balance = users[selectedUser].balance;
+        updateUI();
+    }
+}

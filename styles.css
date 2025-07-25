@@ -1,0 +1,175 @@
+:root {
+    --purple: #6a0dad;
+    --light-purple: #b399d4;
+    --pastel-purple: #d8bfd8;
+    --pastel-blue: #b0e0e6;
+    --white: #ffffff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: var(--pastel-purple);
+    color: var(--purple);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.login-container {
+    background-color: var(--white);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-top: 50px;
+}
+
+.login-container h1 {
+    margin-bottom: 20px;
+    color: var(--purple);
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--purple);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--light-purple);
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+button {
+    background-color: var(--purple);
+    color: var(--white);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #5a0b9d;
+}
+
+.wallet-container {
+    display: none;
+    background-color: var(--white);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+header {
+    background-color: var(--purple);
+    color: var(--white);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    font-size: 24px;
+}
+
+#logout-btn {
+    background-color: var(--white);
+    color: var(--purple);
+}
+
+.balance-section {
+    text-align: center;
+    padding: 30px;
+    background-color: var(--pastel-blue);
+    margin: 20px;
+    border-radius: 10px;
+}
+
+.balance-amount {
+    font-size: 48px;
+    font-weight: bold;
+    color: var(--purple);
+    margin: 10px 0;
+}
+
+.credits-label {
+    font-size: 18px;
+    color: var(--purple);
+}
+
+.admin-section {
+    padding: 20px;
+    margin: 20px;
+    background-color: var(--pastel-purple);
+    border-radius: 10px;
+}
+
+.admin-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.admin-controls input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid var(--light-purple);
+    border-radius: 5px;
+}
+
+.transaction-form {
+    display: flex;
+    gap: 10px;
+}
+
+.transaction-form input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid var(--light-purple);
+    border-radius: 5px;
+}
+
+.history-section {
+    padding: 20px;
+    margin: 20px;
+}
+
+.history-list {
+    margin-top: 15px;
+}
+
+.transaction-item {
+    background-color: var(--pastel-blue);
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.transaction-date {
+    color: #666;
+    font-size: 14px;
+}

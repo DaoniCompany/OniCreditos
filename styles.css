@@ -173,3 +173,23 @@ header h1 {
     color: #666;
     font-size: 14px;
 }
+
+.login-message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    text-align: center;
+    transition: opacity 0.5s;
+}
+
+.login-message.error {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
+
+.login-message.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}

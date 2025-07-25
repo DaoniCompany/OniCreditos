@@ -1,18 +1,3 @@
-document.getElementById("login-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-
-    // Obtén los valores del formulario
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    // Validación simple
-    if (username === "admin" && password === "1234") {
-        document.getElementById("login-container").style.display = "none";
-        document.getElementById("wallet-container").style.display = "block";
-    } else {
-        alert("Usuario o contraseña incorrectos");
-    }
-});
 // Usuarios predefinidos
 const users = {
     admin: {

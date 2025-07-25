@@ -44,7 +44,8 @@ addTransactionBtn.addEventListener('click', handleAddTransaction);
 
 // Funciones
 function handleLogin(e) {
-    e.preventDefault();
+    e.preventDefault(); // Esta línea evita que el formulario se envíe
+    
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
@@ -59,11 +60,15 @@ function handleLogin(e) {
         
         if (currentUser.role === 'admin') {
             adminSection.style.display = 'block';
+        } else {
+            adminSection.style.display = 'none';
         }
         
         updateUI();
     } else {
-        alert('Usuario o contraseña incorrectos');
+        // Cambia el alert por esta línea para mejor feedback
+        showMessage('Usuario o contraseña incorrectos');
+        document.getElementById('password').value = '';
     }
 }
 

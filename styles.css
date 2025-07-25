@@ -193,3 +193,31 @@ header h1 {
     color: #2e7d32;
     border: 1px solid #a5d6a7;
 }
+
+.user-management {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: var(--pastel-blue);
+    border-radius: 8px;
+}
+
+.transfer-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.transfer-controls select {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--light-purple);
+    border-radius: 5px;
+    background-color: white;
+}
+
+.transfer-controls input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--light-purple);
+    border-radius: 5px;
+}

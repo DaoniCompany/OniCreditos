@@ -102,6 +102,19 @@ function handleLogout() {
 function updateUI() {
     balanceAmount.textContent = currentUser.balance;
     renderHistory();
+    
+    // Actualizar el select de usuarios (solo para admin)
+    if (currentUser.role === 'admin') {
+        userSelect.innerHTML = '<option value="">Seleccionar usuario</option>';
+        Object.keys(users).forEach(username => {
+            if (username !== currentUser.username && users[username].role !== 'admin') {
+                const option = document.createElement('option');
+                option.value = username;
+                option.textContent = username;
+                userSelect.appendChild(option);
+            }
+        });
+    }
 }
 
 function renderHistory() {

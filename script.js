@@ -202,7 +202,7 @@ function handleTransfer() {
         return;
     }
 
-    if (isNaN(amount) {
+    if (isNaN(amount)) {
         showMessage('Por favor ingresa una cantidad válida', true);
         return;
     }

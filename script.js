@@ -1,30 +1,11 @@
-// Usuarios predefinidos
-const users = {
-    admin: {
-        password: "admin123",
-        role: "admin",
-        balance: 1000,
-        history: [
-            { date: "2023-05-01", description: "Inicialización de cuenta", amount: 1000 }
-        ]
-    },
-    usuario: {
-        password: "user123",
-        role: "user",
-        balance: 500,
-        history: [
-            { date: "2023-05-01", description: "Inicialización de cuenta", amount: 500 },
-            { date: "2023-05-10", description: "Compra de producto A", amount: -50 }
-        ]
-    }
-};
+// Referencias a Firebase
+const auth = firebase.auth();
+const db = firebase.firestore();
 
+// Datos iniciales
 let currentUser = null;
 
 // Elementos del DOM
-const userSelect = document.getElementById('user-select');
-const transferAmount = document.getElementById('transfer-amount');
-const transferCreditsBtn = document.getElementById('transfer-credits');
 const loginContainer = document.getElementById('login-container');
 const walletContainer = document.getElementById('wallet-container');
 const loginForm = document.getElementById('login-form');
@@ -32,88 +13,173 @@ const logoutBtn = document.getElementById('logout-btn');
 const balanceAmount = document.getElementById('balance-amount');
 const historyList = document.getElementById('history-list');
 const adminSection = document.getElementById('admin-section');
-const addCreditsBtn = document.getElementById('add-credits');
-const removeCreditsBtn = document.getElementById('remove-credits');
-const creditAmount = document.getElementById('credit-amount');
-const addTransactionBtn = document.getElementById('add-transaction');
-const transactionDescription = document.getElementById('transaction-description');
+const userSelect = document.getElementById('user-select');
+const transferAmount = document.getElementById('transfer-amount');
+const transferDescription = document.getElementById('transfer-description');
+const transferCreditsBtn = document.getElementById('transfer-credits');
 
 // Event Listeners
 loginForm.addEventListener('submit', handleLogin);
 logoutBtn.addEventListener('click', handleLogout);
-addCreditsBtn.addEventListener('click', () => handleCreditChange('add'));
-removeCreditsBtn.addEventListener('click', () => handleCreditChange('remove'));
-addTransactionBtn.addEventListener('click', handleAddTransaction);
 transferCreditsBtn.addEventListener('click', handleTransfer);
 
-// Funciones
+// Manejo de autenticación
 function handleLogin(e) {
-    e.preventDefault(); // Esta línea evita que el formulario se envíe
-    
-    const username = document.getElementById('username').value;
+    e.preventDefault();
+    const email = document.getElementById('username').value + '@billetera.com';
     const password = document.getElementById('password').value;
 
-    if (users[username] && users[username].password === password) {
-        currentUser = {
-            username,
-            ...users[username]
-        };
-        
-        loginContainer.style.display = 'none';
-        walletContainer.style.display = 'block';
-        
-        if (currentUser.role === 'admin') {
-            adminSection.style.display = 'block';
-        } else {
-            adminSection.style.display = 'none';
-        }
-        
-        updateUI();
-    } else {
-        // Cambia el alert por esta línea para mejor feedback
-        showMessage('Usuario o contraseña incorrectos');
-        document.getElementById('password').value = '';
-    }
-}
-
-function showMessage(message, isError = true) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `login-message ${isError ? 'error' : 'success'}`;
-    messageDiv.textContent = message;
-    
-    const oldMessage = document.querySelector('.login-message');
-    if (oldMessage) oldMessage.remove();
-    
-    loginForm.prepend(messageDiv);
-    
-    setTimeout(() => {
-        messageDiv.style.opacity = '0';
-        setTimeout(() => messageDiv.remove(), 500);
-    }, 3000);
+    auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            return db.collection('users').doc(userCredential.user.uid).get();
+        })
+        .then((doc) => {
+            if (doc.exists) {
+                currentUser = {
+                    uid: doc.id,
+                    ...doc.data()
+                };
+                
+                loginContainer.style.display = 'none';
+                walletContainer.style.display = 'block';
+                
+                if (currentUser.role === 'admin') {
+                    adminSection.style.display = 'block';
+                    loadUsersForTransfer();
+                } else {
+                    adminSection.style.display = 'none';
+                }
+                
+                updateUI();
+            } else {
+                showMessage('Usuario no encontrado', true);
+                auth.signOut();
+            }
+        })
+        .catch((error) => {
+            showMessage(error.message, true);
+        });
 }
 
 function handleLogout() {
-    currentUser = null;
-    walletContainer.style.display = 'none';
-    loginContainer.style.display = 'block';
-    loginForm.reset();
+    auth.signOut().then(() => {
+        currentUser = null;
+        walletContainer.style.display = 'none';
+        loginContainer.style.display = 'block';
+        loginForm.reset();
+    });
 }
 
-function updateUI() {
-    balanceAmount.textContent = currentUser.balance;
-    renderHistory();
+// Funciones de transferencia
+async function loadUsersForTransfer() {
+    if (currentUser.role !== 'admin') return;
     
-    // Actualizar el select de usuarios (solo para admin)
-    if (currentUser.role === 'admin') {
+    try {
+        const snapshot = await db.collection('users')
+            .where('role', '==', 'user')
+            .get();
+            
         userSelect.innerHTML = '<option value="">Seleccionar usuario</option>';
-        Object.keys(users).forEach(username => {
-            if (username !== currentUser.username && users[username].role !== 'admin') {
+        snapshot.forEach(doc => {
+            if (doc.id !== currentUser.uid) {
                 const option = document.createElement('option');
-                option.value = username;
-                option.textContent = username;
+                option.value = doc.id;
+                option.textContent = doc.data().username;
                 userSelect.appendChild(option);
             }
         });
+    } catch (error) {
+        showMessage('Error cargando usuarios: ' + error.message, true);
+    }
+}
+
+async function handleTransfer() {
+    const userId = userSelect.value;
+    const amount = parseInt(transferAmount.value);
+    const description = transferDescription.value.trim();
+    const today = new Date().toISOString().split('T')[0];
+
+    if (!userId) {
+        showMessage('Por favor selecciona un usuario', true);
+        return;
+    }
+
+    if (isNaN(amount)) {
+        showMessage('Por favor ingresa una cantidad válida', true);
+        return;
+    }
+
+    if (amount <= 0) {
+        showMessage('La cantidad debe ser mayor que cero', true);
+        return;
+    }
+
+    if (!description) {
+        showMessage('Por favor ingresa una descripción', true);
+        return;
+    }
+
+    try {
+        // Actualizar usuario receptor
+        const userRef = db.collection('users').doc(userId);
+        await db.runTransaction(async (transaction) => {
+            const userDoc = await transaction.get(userRef);
+            if (!userDoc.exists) throw "Usuario no existe";
+            
+            const newBalance = userDoc.data().balance + amount;
+            transaction.update(userRef, {
+                balance: newBalance,
+                history: firebase.firestore.FieldValue.arrayUnion({
+                    date: today,
+                    description: `${description} (Transferido por admin)`,
+                    amount: amount
+                })
+            });
+        });
+
+        // Actualizar admin
+        await db.collection('users').doc(currentUser.uid).update({
+            history: firebase.firestore.FieldValue.arrayUnion({
+                date: today,
+                description: `Transferencia a ${userSelect.options[userSelect.selectedIndex].text}: ${description}`,
+                amount: -amount
+            })
+        });
+
+        showMessage(`¡Se transfirieron ${amount} créditos!`, false);
+        
+        // Limpiar campos
+        transferAmount.value = '';
+        transferDescription.value = '';
+        userSelect.value = '';
+        
+        // Actualizar UI
+        updateUI();
+    } catch (error) {
+        showMessage('Error en transferencia: ' + error, true);
+    }
+}
+
+// Actualización de UI
+async function updateUI() {
+    if (!currentUser) return;
+    
+    try {
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            currentUser.balance = userData.balance;
+            currentUser.history = userData.history || [];
+            
+            balanceAmount.textContent = userData.balance;
+            renderHistory();
+            
+            if (currentUser.role === 'admin') {
+                loadUsersForTransfer();
+            }
+        }
+    } catch (error) {
+        showMessage('Error actualizando datos: ' + error.message, true);
     }
 }
 
@@ -141,101 +207,97 @@ function renderHistory() {
     });
 }
 
-function handleCreditChange(action) {
-    const amount = parseInt(creditAmount.value);
+// Función para mostrar mensajes
+function showMessage(message, isError) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `login-message ${isError ? 'error' : 'success'}`;
+    messageDiv.textContent = message;
     
-    if (isNaN(amount)) {
-        alert('Por favor ingresa una cantidad válida');
-        return;
-    }
+    const oldMessage = document.querySelector('.login-message');
+    if (oldMessage) oldMessage.remove();
     
-    if (amount <= 0) {
-        alert('La cantidad debe ser mayor que cero');
-        return;
-    }
+    loginForm.prepend(messageDiv);
     
-    if (action === 'remove' && amount > currentUser.balance) {
-        alert('No tienes suficientes créditos');
-        return;
-    }
-    
-    const change = action === 'add' ? amount : -amount;
-    currentUser.balance += change;
-    
-    const today = new Date().toISOString().split('T')[0];
-    currentUser.history.push({
-        date: today,
-        description: action === 'add' ? 'Créditos agregados' : 'Créditos retirados',
-        amount: change
-    });
-    
-    creditAmount.value = '';
-    updateUI();
+    setTimeout(() => {
+        messageDiv.style.opacity = '0';
+        setTimeout(() => messageDiv.remove(), 500);
+    }, 3000);
 }
 
-function handleAddTransaction() {
-    const description = transactionDescription.value.trim();
-    
-    if (!description) {
-        alert('Por favor ingresa una descripción');
-        return;
-    }
-    
-    const today = new Date().toISOString().split('T')[0];
-    currentUser.history.push({
-        date: today,
-        description,
-        amount: 0
-    });
-    
-    transactionDescription.value = '';
-    updateUI();
-}
+// Inicialización de usuarios (solo ejecutar una vez para crear usuarios iniciales)
+async function initializeUsers() {
+    const users = {
+        admin: {
+            username: "admin",
+            password: "admin123",
+            role: "admin",
+            balance: 1000,
+            history: [{
+                date: new Date().toISOString().split('T')[0],
+                description: "Inicialización de cuenta",
+                amount: 1000
+            }]
+        },
+        usuario: {
+            username: "usuario",
+            password: "user123",
+            role: "user",
+            balance: 500,
+            history: [{
+                date: new Date().toISOString().split('T')[0],
+                description: "Inicialización de cuenta",
+                amount: 500
+            }]
+        }
+    };
 
-function handleTransfer() {
-    const selectedUser = userSelect.value;
-    const amount = parseInt(transferAmount.value);
-    const today = new Date().toISOString().split('T')[0];
-
-    if (!selectedUser) {
-        showMessage('Por favor selecciona un usuario', true);
-        return;
-    }
-
-    if (isNaN(amount)) {
-        showMessage('Por favor ingresa una cantidad válida', true);
-        return;
-    }
-
-    if (amount <= 0) {
-        showMessage('La cantidad debe ser mayor que cero', true);
-        return;
-    }
-
-    // Actualizar el balance del usuario seleccionado
-    users[selectedUser].balance += amount;
-    users[selectedUser].history.push({
-        date: today,
-        description: `Créditos añadidos por admin (${currentUser.username})`,
-        amount: amount
-    });
-
-    // Registrar la transacción en el admin también
-    currentUser.history.push({
-        date: today,
-        description: `Créditos transferidos a ${selectedUser}`,
-        amount: -amount
-    });
-
-    showMessage(`¡Se añadieron ${amount} créditos a ${selectedUser}!`, false);
-    
-    // Limpiar los campos
-    transferAmount.value = '';
-    userSelect.value = '';
-
-    // Si el usuario actual es el que recibió créditos, actualizar UI
-    if (currentUser.username === selectedUser) {
-        currentUser.balance = users[selectedUser].balance;
-        updateUI();
+    try {
+        for (const [username, userData] of Object.entries(users)) {
+            const email = username + '@billetera.com';
+            const { user } = await auth.createUserWithEmailAndPassword(email, userData.password);
+            await db.collection('users').doc(user.uid).set({
+                username: userData.username,
+                role: userData.role,
+                balance: userData.balance,
+                history: userData.history
+            });
+        }
+        console.log('Usuarios inicializados correctamente');
+    } catch (error) {
+        console.error('Error inicializando usuarios:', error);
     }
 }
+
+// Descomenta la siguiente línea solo la primera vez para crear usuarios
+// initializeUsers();
+
+// Escuchar cambios de autenticación
+auth.onAuthStateChanged(user => {
+    if (user) {
+        db.collection('users').doc(user.uid).get()
+            .then(doc => {
+                if (doc.exists) {
+                    currentUser = {
+                        uid: doc.id,
+                        ...doc.data()
+                    };
+                    
+                    loginContainer.style.display = 'none';
+                    walletContainer.style.display = 'block';
+                    
+                    if (currentUser.role === 'admin') {
+                        adminSection.style.display = 'block';
+                        loadUsersForTransfer();
+                    } else {
+                        adminSection.style.display = 'none';
+                    }
+                    
+                    updateUI();
+                }
+            });
+    } else {
+        currentUser = null;
+        walletContainer.style.display = 'none';
+        loginContainer.style.display = 'block';
+    }
+});

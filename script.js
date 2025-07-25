@@ -142,7 +142,7 @@ function renderHistory() {
 function handleCreditChange(action) {
     const amount = parseInt(creditAmount.value);
     
-    if (isNaN(amount) {
+    if (isNaN(amount)) {
         alert('Por favor ingresa una cantidad válida');
         return;
     }

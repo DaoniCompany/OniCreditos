@@ -22,6 +22,9 @@ const users = {
 let currentUser = null;
 
 // Elementos del DOM
+const userSelect = document.getElementById('user-select');
+const transferAmount = document.getElementById('transfer-amount');
+const transferCreditsBtn = document.getElementById('transfer-credits');
 const loginContainer = document.getElementById('login-container');
 const walletContainer = document.getElementById('wallet-container');
 const loginForm = document.getElementById('login-form');

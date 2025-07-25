@@ -36,6 +36,18 @@
             </div>
 
             <div class="admin-section" id="admin-section" style="display: none;">
+                <div class="user-management">
+    <h3>Gestión de Usuarios</h3>
+    <div class="transfer-controls">
+        <select id="user-select">
+            <option value="">Seleccionar usuario</option>
+            <option value="usuario">Usuario Normal</option>
+            <!-- Puedes añadir más opciones si tienes más usuarios -->
+        </select>
+        <input type="number" id="transfer-amount" placeholder="Cantidad">
+        <button id="transfer-credits">Transferir Créditos</button>
+    </div>
+</div>
                 <h2>Administrar Créditos</h2>
                 <div class="admin-controls">
                     <input type="number" id="credit-amount" placeholder="Cantidad">
